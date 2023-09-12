@@ -1,0 +1,535 @@
+---
+title: "Oficina de Introdução ao R"
+author: "Jorge Alonso"
+date: "2023-09-04"
+output: github_document
+---
+
+**Objetivo:** Apresentar o software R aos participantes do curso, demonstrar sua aplicação para análises estatísticas de dados de inventário florestal e implementar a adaptação de códigos para realizar análises semelhantes às apresentadas.
+
+**Conteúdo do curso:**
+
+1)  Primeiros passos;
+
+2)  Operações básicas;
+
+3)  Pacotes, funções e argumentos;
+
+4)  Noções de análise exploratória;
+
+5)  Estatística descritiva;
+
+6)  Tabelas e gráficos;
+
+7)  Noções sobre associação entre variáveis.
+
+## 1) Primeiros passos:
+
+```{r}
+# No R o hashtag é utilizado para identificar uma linha de texto.
+# Se começarmos a linha sem o # essa será uma linha de código.
+# Rode o código abaixo como exemplo (pressione crtl + enter na linha abaixo):
+print("Hello, World")
+
+```
+
+```{r}
+# Agora tente rodar o código dessa maneira:
+# print("Hello, World")
+
+# E dessa:
+# Hello, World
+
+# O que aconteceu de diferente em cada caso?
+
+```
+
+A entrada do código foi reconhecida, mas ele não gerou uma saída e sim uma mensagem de erro.
+
+**OBS:** Neste script o código não foi rodado, porque ele contém um erro que impediria a criação do arquivo para publicação. 
+
+```{r}
+# Podemos utilizar o # após um código para incluir observações:
+print("Hello, World") # É uma tradição utilizar esse código como boas-vindas a uma linguagem de programação.
+
+```
+
+## 2) Operações básicas de cálculo:
+
+```{r}
+# Adição
+1 + 2
+```
+
+```{r}
+# Subtração
+4 - 2
+```
+
+```{r}
+# Multiplicação
+3 * 5
+```
+
+```{r}
+# Divisão
+10 / 2
+```
+
+```{r}
+# Exponencial
+3 ^ 2
+```
+
+### Operadores lógicos:
+
+```{r}
+# Igual
+1 == 1
+1 == 2
+```
+
+```{r}
+# Diferente
+1 != 1
+1 != 2
+```
+
+```{r}
+# Maior
+1 > 3
+```
+
+```{r}
+# Menor
+1 < 3
+```
+
+```{r}
+# Menor ou igual
+1 <= 1
+```
+
+```{r}
+# Maior ou igual
+1 >= 3 
+```
+
+## 3) Pacotes, funções e argumentos
+
+```{r}
+## Instalando pacotes
+# install.packages("forestmangr")
+```
+
+No R utilizamos funções para realizar as tarefas que desejamos. Por exemplo, a função install.packages é utilizada para instalar pacotes. Os pacotes são como "expansões" do R contendo novas funções, bases de dados, etc.
+
+**OBS:** No exemplo acima eu não estarei rodando a função, porque já tenho o pacote instalado.
+
+```{r}
+## Carregando um pacote
+library(forestmangr)
+```
+
+Após a instalação de um pacote e sempre que se desejarmos utilizar suas funcionalidades temos que carregá-lo. A função "library" ou a função "require" podem ser utilizadas para essa finalidade. Neste caso, estamos carregando o pacote "forestmangr" que contém dados de inventários florestais, além de algumas funções específicas para essa finalidade.
+
+```{r}
+## Carregando um conjunto de dados do pacote
+data("exfm20")
+```
+O conjunto de dados "exfm20" é disponibilizado no pacote forestmangr. Ele contém dados de um inventário em floresta nativa. Utilizamos a função "data" para carregar os dados.
+
+**OBS:** Neste curso faremos as demonstrações e práticas a partir de um conjunto de dados disponibilizado em um pacote do R. Na prática, para fazer análises em dados de um experimento nosso, precisariámos utilizar funções que carreguem e leiam planilhas no Excel ou outros tipos de arquivo. 
+
+```{r}
+### Resumindo o conjunto de dados
+summary(exfm20)
+# Com a função summary conseguimos ter uma visão geral dos dados.
+# O que vocês conseguem observar?
+```
+Conseguimos observar que existem variáveis quantitativas (altura - Htot e diâmetro - dbh) e variáveis qualitivas (espécie, família) no conjunto de dados. Conseguimos ver que existem alguns dados faltantes (NA's). Conseguimos ver quais as espécies e famílias de maior ocorrência. Conseguimos ver a média, mediana e ter uma noção de dispersão da altura e do diâmetro. Entre várias outras observações...
+
+```{r}
+## Criando vetores
+dados <- exfm20
+```
+No R utilizamos vetores (ou objetos) para armazenar dados. Com o código acima, criamos um vetor com o nome mais fácil para trabalhar os dados.
+
+```{r}
+## Filtrando dados
+dados_lecythis <- subset(dados, scientific.name == "Lecythis idatimon")
+```
+Utilizamos a função subset para filtrar os dados. Dentro das funções no R podemos utilizar argumentos para especificar o que queremos fazer. O argumento select foi utilizado para filtrar os dados pela coluna "scientific.name". E para células com o nível "Lecythis idatimon" dentro dessa coluna.
+
+### Outros tipos de filtros:
+```{r}
+# Coluna
+head(dados$dbh, 25)
+```
+
+```{r}
+# A mesma coisa de outra maneira
+head(dados[,7], 25)
+```
+
+```{r}
+# Linha
+dados[7,]
+```
+
+```{r}
+# Célula
+dados[7, 7]
+```
+
+### Prática:
+```{r}
+# Como podemos filtrar os dados para a espécie Eschweilera coriacea?
+dados_eschweilera <- subset(dados, scientific.name == "Eschweilera coriacea")
+head(dados_eschweilera)
+```
+
+
+```{r}
+# E para a família Fabaceae?
+dados_fabaceae <- subset(dados, family == "Fabaceae")
+head(dados_fabaceae)
+```
+
+## 4) Explorando os dados
+```{r}
+### Vamos rodar novamente a função summary
+summary(dados)
+```
+
+Podemos ver que existem alguns NAs entre os dados. NA = not available // dados não existentes.
+Algumas funções não vão rodar ou vão rodar errado se não tratarmos os dados.
+
+Temos duas opções:
+Podemos transformar os NAs pelo valor da média (ou outra medida) de cada variável
+
+Podemos retirar essas linha do conjunto de dados.
+
+Como estamos diante de dados com muitas observações e variáveis, vamos utilizar a segunda opção
+```{r}
+# Removendo observações com dados não disponíveis
+dados_pp <- na.omit(dados)
+```
+
+**OBS:** sempre que modificarmos a base de dados original, convém criar um novo objeto.
+
+```{r}
+# Verificamos novamente:
+summary(dados_pp)
+```
+
+Observamos que não temos mais NAs na nossa tabela. Todas as linhas com NAs foram removidas com a função utilizada acima.
+
+### Dados inconsistentes
+É possível observar que o diâmetro mínimo neste inventário foi de 10 cm. Por outro lado, vemos que existem árvores com altura de apenas 3 m.
+
+Um dado inconsistente seria aquele impossível de ser observado. Por exemplo, uma árvore com altura 0 ou -13. No caso observado acima, uma árvore que quebrou com a queda de outra pode ter, por exemplo, 10 cm de DAP e 3 m de altura.
+
+Por via das dúvidas podemos checar as células onde temos observações, por exemplo, com altura menor que 4 m.
+
+```{r}
+# Checando observações com altura menor que 4m
+which(dados_pp$Htot < 4.0)
+```
+
+```{r}
+# Podemos observar linhas para conferir os valores das outras variáveis
+dados_pp[1206,]
+dados_pp[1208,]
+# E aí? O que vocês acham?
+```
+Note que para a observação na posição 1208, quando comparamos a altura comercial com a total, podemos supor que houve um erro de digitação. Não é correto a comercial ser maior que a total.
+
+Para fins didáticos, vamos deixar o conjunto de dados assim. Dependendo das análises a serem feitas, seria plausível identificar e retirar alguns outliers da amostra.
+
+### Prática:
+```{r}
+# Faça essa operação para o vetor dados_lecythis.
+summary(dados_lecythis)
+```
+
+```{r}
+# Retirando os NAs
+dados_l_pp <- na.omit(dados_lecythis)
+
+# Checando novamente
+summary(dados_l_pp)
+```
+```{r}
+# Checando observações com altura menor que 4m
+which(dados_l_pp$Htot < 4.0)
+```
+```{r}
+# Verificando uma das observações
+dados_l_pp[101,]
+```
+
+## 5) Operações estatísticas básicas
+```{r}
+### Calculando a média geral para o diâmetro
+mean(dados_pp$dbh)
+```
+
+
+```{r}
+# Calculando a média do diâmetro em cada transecto
+aggregate(dbh ~ transect, data = dados_pp, FUN = mean)
+```
+
+
+```{r}
+### Calculando o desvio padrão para o diâmetro
+sd(dados_pp$dbh)
+```
+
+
+```{r}
+# Calculando o desvio padrão do diâmetro em cada transecto
+aggregate(dbh ~ transect, data = dados_pp, FUN = sd)
+```
+
+
+```{r}
+### Não temos função para o coeficiente de variação no R, mas podemos...
+# ... combinar funções para calcular:
+(sd(dados_pp$dbh)/mean(dados_pp$dbh))*100
+```
+
+
+```{r}
+# Podemos ainda criar funções no R
+cv <- function(x) (sd(x)/mean(x)) * 100
+
+# E aplicá-las com outras funções:
+aggregate(dbh ~ transect, data = dados_pp, FUN = cv)
+```
+
+### Prática:
+```{r}
+# Calcule essas mesmas medidas para a altura total.
+
+# Média
+mean(dados_pp$Htot)
+```
+
+```{r}
+# Média da altura em cada transecto
+aggregate(Htot ~ transect, data = dados_pp, FUN = mean)
+```
+
+
+```{r}
+# Desvio padrão para a altura
+sd(dados_pp$Htot)
+```
+
+
+```{r}
+# Desvio padrão da altura em cada transecto
+aggregate(Htot ~ transect, data = dados_pp, FUN = sd)
+```
+
+
+```{r}
+# Coeficiente de variação para a altura
+cv(dados_pp$Htot)
+```
+
+
+```{r}
+# Coeficiente de variação para a altura em cada parcela
+aggregate(dbh ~ transect, data = dados_pp, FUN = cv)
+```
+
+## 6) Tabelas e gráficos de frequências
+
+```{r}
+### Vamos carregar um pacote para facilitar a criação das tabelas
+library(fdth)
+```
+
+### Tabelas:
+```{r}
+## Tabela de frequências para a variável qualitativa família
+tab_familia <- fdt_cat(dados_pp$family); tab_familia
+```
+
+
+```{r}
+### Tabela de frequências para a variável quantitativa diâmetro
+tab_diametro <- fdt(dados_pp$dbh); tab_diametro
+```
+
+### Prática:
+```{r}
+# Faça a tabela para a variável nome científico.
+tab_especie <- fdt_cat(dados_pp$scientific.name)
+
+# Use a função head para exibir os dados. O que aconteceu?
+head(tab_especie, 10)
+```
+ Utilizando a função "head" temos como saída apenas as dez primeiras linhas da tabela de frequências.
+
+```{r}
+# Faça a tabela para a variável altura total.
+tab_altura <- fdt(dados_pp$Htot); tab_altura
+```
+### Gráficos
+```{r}
+## Gráfico de barras para a frequência das principais famílias
+
+# O mais simples
+barplot(head(tab_familia$f, 10))
+```
+
+
+```{r}
+# Alarga a margem da janela para o gráfico.
+par(mar = c(5,10,4,2) + 0.1, family = "serif")
+
+# Gráfico
+barplot(head(tab_familia$f, 10), # Selecionamos as 10 famílias de maior frequência. 
+        horiz = T, # Argumento para colocar as barras verticais ou horizontais. T e TRUE são equivalentes.
+        xlab = "Frequências",  # Colocamos título do eixo x
+        names.arg = c(head(tab_familia$Category, 10)), las = 2, # Colocamos os nomes das famílias em cada barra.
+        cex = 1.3, cex.lab = 1.5, cex.axis = 1.2, col = heat.colors(10)) # Estabelecemos tamanho das letras
+# e cores para as barras.
+
+# Colocamos uma linha no eixo y.
+abline(v = 0)
+```
+
+
+```{r}
+# Retorna a margem ao normal.
+par(mar = c(5,4,4,2) + 0.1)
+```
+
+
+```{r}
+### Histograma para as classes de diâmetro
+
+# O mais simples
+hist(dados_pp$dbh)
+```
+
+
+```{r}
+# Gráfico
+plot(tab_diametro, xlab = "Classes de diâmetro",ylab = "Frequências", # Determina a base de dados e títulos dos eixos 
+     cex.axis = 0.9, cex.lab = 1.1, # Edita o tamanho das letras 
+     col = c(rainbow(15))) # Edita as cores
+```
+
+### Prática
+```{r}
+# Faça o mesmo gráfico de barras para as 10 principais espécies
+# Alarga a margem da janela para o gráfico.
+par(mar = c(5,12,4,2) + 0.1, family = "serif")
+
+# Gráfico
+barplot(head(tab_especie$f, 10), # Selecionamos as 10 famílias de maior frequência. 
+        horiz = T, # Argumento para colocar as barras verticais ou horizontais. T e TRUE são equivalentes.
+        xlab = "Frequências",  # Colocamos título do eixo x
+        names.arg = c(head(tab_especie$Category, 10)), las = 2, # Colocamos os nomes das famílias em cada barra.
+        cex = 1.3, cex.lab = 1.5, cex.axis = 1.2, col = heat.colors(10)) # Estabelecemos tamanho das letras
+# e cores para as barras.
+
+# Colocamos uma linha no eixo y.
+abline(v = 0)
+```
+```{r}
+# Retorna a margem ao normal.
+par(mar = c(5,4,4,2) + 0.1)
+```
+
+
+
+```{r}
+# Faça o histograma do diâmetro para Lecythis idatimon. Compare com o geral.
+
+# Tabela para Lecythis
+tab_dia_lecy <- fdt(dados_lecythis$dbh)
+
+# Gráfico
+plot(tab_dia_lecy, xlab = "Classes de diâmetro",ylab = "Frequências", # Determina a base de dados e títulos dos eixos 
+     cex.axis = 0.9, cex.lab = 1.1, # Edita o tamanho das letras 
+     col = c(rainbow(15))) # Edita as cores
+```
+A amplitude entre o diâmetro máximo e mínimo é consideralvemente menor para a espécie estudada em comparação com o total de árvores amostradas. Por consequência, os intervalos de classes são menores. A distribuição também está concentrada nos menores valores, mas com menos intensidade.
+
+
+### Avaliando graficamente a tendência central e dispersão - boxplot
+```{r}
+# O mais simples
+boxplot(dados_pp$dbh)
+```
+
+
+```{r}
+# Plotando os dados de diâmetro por transecto 
+boxplot(data = dados_pp, dbh ~ transect, xlab = "Transecto", ylab = "Diâmetro (cm)",
+        col = terrain.colors(22))
+```
+
+### Prática II
+```{r}
+# Faça o boxplot para a altura nos transectos.
+boxplot(data = dados_pp, Htot ~ transect, xlab = "Transecto", ylab = "Altura (m)",
+        col = terrain.colors(22))
+
+```
+
+```{r}
+# Faça o boxplot do diâmetro para Lecythis idatimon nos transectos. Compare com o geral.
+boxplot(data = dados_lecythis, dbh ~ transect, xlab = "Transecto", ylab = "Diâmetro (cm)",
+        col = terrain.colors(22))
+
+```
+Há uma variação muito maior nos transectos para o diâmetro da espécie estudada em relação ao diâmetro para todas as árvores amostradas. A maioria dos transectos apresentou mediana em torno de 15 cm e parte deles valores maiores que 20 cm. Esse resultado demonstra que existe uma certa variação entre transectos e na distribuição espacial da espécie considerada.
+
+## 7) Associação entre variáveis
+```{r}
+# Vamos explorar a associação entre diâmetro e altura
+
+### Correlação linear
+cor.test(dados_pp$dbh, dados_pp$Htot)
+```
+Existe uma correlação linear positiva de moderada a forte entre as variáveis altura e diâmetro. Ou seja, árvores com maiores diâmetros tem tendência de apresentar maiores alturas. Esse padrão pode ser observado nos gráficos abaixo.
+
+```{r}
+### Representação gráfica
+
+# O mais simples
+plot(data = dados_pp, Htot ~ dbh)
+```
+
+
+```{r}
+# Editando o gráfico
+plot(data = dados_pp, Htot ~ dbh, xlab = "Diâmetro (cm)", ylab = "Altura (m)")
+
+# Adicionando linha de tendência
+abline(lm(data = dados_pp, Htot ~ dbh), col="darkred", lwd=3.5)
+```
+
+### Prática
+```{r}
+# Avalie a associação entre o diâmetro e o volume.
+
+## Correlação linear
+cor.test(dados_pp$dbh, dados_pp$vol)
+```
+```{r}
+# Plotando o gráfico
+plot(data = dados_pp, vol ~ dbh, xlab = "Volume (m³)", ylab = "Diâmetro (cm)")
+
+# Adicionando linha de tendência
+abline(lm(data = dados_pp, vol ~ dbh), col="darkred", lwd=3.5)
+```
+Os resultados demonstram um correlação linear positiva bastante forte entre o diâmetro e o volume. Como é uma prática comum utilizar o diâmetro (com ou sem outras variáveis) para estimar o volume, esses resultados sugerem que no atual conjunto de dados o diâmetro pode ter sido estimado.
